@@ -22,15 +22,42 @@ class Auth extends Component {
   };
 
   initiateLogin = () => {
+      auth.authorize();
   };
 
   logout = () => {
+      this.setState({
+          authenticated: false,
+          user: {
+              role: "visitor"
+          },
+          accessToken: ""
+      });
   };
 
   handleAuthentication = () => {
+      auth.parseHash((error, authResult) => {
+          if (error) {
+              console.log(error);
+              console.log(`Error ${error.error} occured`);
+              return;
+          }
+
+          this.setSession(authResult.idTokenPayload);
+      });
   };
 
   setSession(authResult) {
+      const user = {
+          id: authResult.sub,
+          email: authResult.email,
+          role: authResult[AUTH_CONFIG.roleUrl]
+      };
+      this.setState({
+          authenticated: true,
+          accessToken: authResult.accessToken,
+          user
+      });
   }
 
   render() {
